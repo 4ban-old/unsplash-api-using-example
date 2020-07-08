@@ -1,0 +1,65 @@
+.tweet-card {
+  margin: 0.4em 0;
+  border: 1px rgb(189, 184, 184) solid;
+  padding: 1em;
+  border-radius: 5px;
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  cursor: pointer;
+}
+
+.tweet-avatar {
+  width: 5em;
+  height: 5em;
+  border-radius: 5px;
+  margin-right: 0.9em;
+}
+
+.tweet-author {
+  padding-bottom: 0.5em;
+}
+
+.tweet-name {
+  font-weight: bold;
+  text-decoration: none;
+  color: inherit;
+}
+
+.tweet-name:hover {
+  color: #1da1f2;
+}
+
+.tweet-handle a {
+  font-size: 14px;
+  color: grey;
+  padding-left: 0.4em;
+  text-decoration: none;
+}
+
+.tweet-handle a:hover {
+  color: darkgrey;
+}
+
+.tweet-time {
+  font-size: 14px;
+  color: grey;
+  position: absolute;
+  top: 0.9em;
+  right: 0.4em;
+}
+
+.tweet-remove {
+  position: absolute;
+  bottom: 0.4em;
+  right: 0.4em;
+}
+
+.tweet-remove button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: red;
+  text-decoration: underline;
+  cursor: pointer;
+}
