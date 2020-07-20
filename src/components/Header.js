@@ -4,13 +4,16 @@ const headerStyle = {
   borderBottom: "2px solid black",
   margin: "0.9em 0 2em 0",
 };
-const Header = ({ text }) => {
-  return (
-    <div style={headerStyle}>
-      <h1>{text}</h1>
-    </div>
-  );
-};
+
+class Header extends React.Component {
+  render() {
+    return (
+      <div style={headerStyle}>
+        <h1>{this.props.text}</h1>
+      </div>
+    );
+  }
+}
 
 Header.defaultProps = {
   text: "I'm a default prop",

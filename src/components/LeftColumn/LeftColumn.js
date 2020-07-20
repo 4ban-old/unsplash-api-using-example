@@ -1,18 +1,24 @@
 import React from "react";
 import TweetItem from "../TweetItem.js";
 import Loading from "../Loading";
-const LeftColumn = ({ tweets, onDragStart }) => {
-  const renderList = () => {
-    if (tweets.length === 0) return <Loading text="Nothing to show" />;
+
+class LeftColumn extends React.Component {
+  renderList() {
+    if (this.props.tweets.length === 0 || this.props.tweets[0] == null)
+      return <Loading text="Nothing to show" />;
     else
-      return tweets.map((tweet) => {
+      return this.props.tweets.map((tweet) => {
         return (
-          <TweetItem tweet={tweet} key={tweet.id} onDragStart={onDragStart} />
+          <TweetItem
+            tweet={tweet}
+            key={tweet.id}
+            onDragStart={(e, tweet) => this.props.onDragStart(e, tweet)}
+          />
         );
       });
-  };
-
-  return <div id="leftColumn">{renderList()}</div>;
-};
-
+  }
+  render() {
+    return <div id="leftColumn">{this.renderList()}</div>;
+  }
+}
 export default LeftColumn;

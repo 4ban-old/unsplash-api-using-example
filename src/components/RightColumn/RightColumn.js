@@ -1,23 +1,27 @@
 import React from "react";
 import TweetItem from "../TweetItem.js";
 import Loading from "../Loading";
-const RightColumn = ({ tweets, onDragStart, removeSavedTweet }) => {
-  const renderList = () => {
-    if (tweets.length === 0) return <Loading text="No saved tweets" />;
+class RightColumn extends React.Component {
+  renderList() {
+    console.log(this.props.tweets);
+    if (this.props.tweets.length === 0 || this.props.tweets[0] == null)
+      return <Loading text="No saved tweets" />;
     else
-      return tweets.map((tweet) => {
+      return this.props.tweets.map((tweet) => {
         return (
           <TweetItem
             tweet={tweet}
             key={tweet.id}
-            onDragStart={onDragStart}
+            onDragStart={(e, tweet) => this.props.onDragStart(e, tweet)}
             removable={true}
-            removeSavedTweet={removeSavedTweet}
+            removeSavedTweet={(id) => this.props.removeSavedTweet(id)}
           />
         );
       });
-  };
-  return <div id="rightColumn">{renderList()}</div>;
-};
+  }
+  render() {
+    return <div id="rightColumn">{this.renderList()}</div>;
+  }
+}
 
 export default RightColumn;

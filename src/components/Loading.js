@@ -5,9 +5,12 @@ const loadingStyle = {
   textAlign: "center",
   fontSize: "18px",
 };
-const Loading = ({ text }) => {
-  return <div style={loadingStyle}>{text}</div>;
-};
+
+class Loading extends React.Component {
+  render() {
+    return <div style={loadingStyle}>{this.props.text}</div>;
+  }
+}
 
 Loading.defaultProps = {
   text: "Loading...",

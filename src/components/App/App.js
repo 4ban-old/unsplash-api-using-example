@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import "./App.css";
 import SearchBar from "../SearchBar";
 import Header from "../Header";
@@ -9,32 +9,36 @@ import api from "../../api";
 
 // Twitter API doesn't work because of CORS policy issue that can't be resolved without backend
 // import { twitter } from "../../api";
-const App = () => {
-  const [tweets, setTweets] = useState([]);
-  const [savedTweets, setSavedTweets] = useState([]);
-  const [tweetToSave, setTweetToSave] = useState({});
-
-  useEffect(() => {
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      tweets: [],
+      savedTweets: [],
+      tweetToSave: {},
+    };
+  }
+  componentDidMount() {
     const saved = JSON.parse(localStorage.getItem("tweets"));
-    setSavedTweets(saved ? saved : []);
-  }, []);
+    this.setState({ savedTweets: saved ? saved : [] });
+  }
 
-  const onFinalSubmit = async (query) => {
+  async onFinalSubmit(query) {
     const response = await api.get("/search/photos", {
       params: {
         query,
         per_page: 10,
       },
     });
-    setTweets(response.data.results);
-  };
+    this.setState({ tweets: response.data.results });
+  }
 
-  const onSubmit = (query) => {
+  onSubmit(query) {
     // query handler that does the API request passed through props in that way:
     // App -> LeftColumn -> SearchBar
     // Can be refactored with Redux or React context
-    onFinalSubmit(query);
-  };
+    this.onFinalSubmit(query);
+  }
 
   // Twitter SPI doesn't work because of CORS policy issue that can't be resolver without backend
   // const onFinalSubmit = (query) => {
@@ -47,72 +51,81 @@ const App = () => {
   //   });
   // };
 
-  const onDrop = (e) => {
+  onDrop(e) {
     e.preventDefault();
     const saved = JSON.parse(localStorage.getItem("tweets"));
     if (saved) {
-      saved.push(tweetToSave);
+      saved.push(this.state.tweetToSave);
       localStorage.setItem("tweets", JSON.stringify(saved));
     } else {
-      localStorage.setItem("tweets", JSON.stringify([tweetToSave]));
+      localStorage.setItem("tweets", JSON.stringify([this.state.tweetToSave]));
     }
-    setSavedTweets(JSON.parse(localStorage.getItem("tweets")));
+    this.setState({ savedTweets: JSON.parse(localStorage.getItem("tweets")) });
 
     var data = e.dataTransfer.getData("tweet");
     document.getElementById(data).style.display = "none";
-  };
+  }
 
-  const onDragOver = (e) => {
+  onDragOver(e) {
     e.preventDefault();
-  };
+  }
 
-  const onDragStart = (e, tweet) => {
-    setTweetToSave(tweet);
+  onDragStart(e, tweet) {
+    this.setState({ tweetToSave: tweet });
     e.dataTransfer.setData("tweet", e.target.id);
-  };
+  }
 
-  const clearLocalStorage = () => {
+  clearLocalStorage() {
     localStorage.clear();
-    setSavedTweets([]);
-  };
+    this.setState({ savedTweets: [] });
+  }
 
-  const removeSavedTweet = (id) => {
+  removeSavedTweet(id) {
     const saved = JSON.parse(localStorage.getItem("tweets"));
     const updated = saved.filter((tweet) => tweet.id !== id);
     if (updated.length) localStorage.setItem("tweets", JSON.stringify(updated));
     else localStorage.setItem("tweets", "[]");
-    setSavedTweets(JSON.parse(localStorage.getItem("tweets")));
-  };
+    this.setState({ savedTweets: JSON.parse(localStorage.getItem("tweets")) });
+  }
 
-  return (
-    <div className="App">
-      <Header text="Tweet Saver" />
-      <div className="columnWrapper">
-        <div className="searchBarWrapper">
-          <SearchBar onSubmit={onSubmit} />
+  render() {
+    return (
+      <div className="App">
+        <Header text="Tweet Saver" />
+        <div className="columnWrapper">
+          <div className="searchBarWrapper">
+            <SearchBar onSubmit={(query) => this.onSubmit(query)} />
+          </div>
+          <button
+            onClick={() => this.clearLocalStorage()}
+            className="clearButton"
+          >
+            Clear LocalStorage
+          </button>
         </div>
-        <button onClick={clearLocalStorage} className="clearButton">
-          Clear LocalStorage
-        </button>
+        <div className="columnWrapper">
+          <div className="column">
+            <LeftColumn
+              onFinalSubmit={(query) => this.onFinalSubmit(query)}
+              tweets={this.state.tweets}
+              onDragStart={(tweet) => this.onDragStart(tweet)}
+            />
+          </div>
+          <div
+            className="column"
+            onDragOver={(e) => this.onDragOver(e)}
+            onDrop={(e) => this.onDrop(e)}
+          >
+            <RightColumn
+              tweets={this.state.savedTweets}
+              onDragStart={(e, tweet) => this.onDragStart(e, tweet)}
+              removeSavedTweet={(id) => this.removeSavedTwee(id)}
+            />
+          </div>
+        </div>
       </div>
-      <div className="columnWrapper">
-        <div className="column">
-          <LeftColumn
-            onFinalSubmit={onFinalSubmit}
-            tweets={tweets}
-            onDragStart={onDragStart}
-          />
-        </div>
-        <div className="column" onDragOver={onDragOver} onDrop={onDrop}>
-          <RightColumn
-            tweets={savedTweets}
-            onDragStart={onDragStart}
-            removeSavedTweet={removeSavedTweet}
-          />
-        </div>
-      </div>
-    </div>
-  );
-};
+    );
+  }
+}
 
 export default App;
