@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { useSelector, useDispatch } from "react-redux";
 import "./App.css";
 import SearchBar from "../SearchBar";
 import Header from "../Header";
@@ -6,46 +7,22 @@ import LeftColumn from "../LeftColumn/LeftColumn";
 import RightColumn from "../RightColumn/RightColumn";
 
 import api from "../../api";
+import { setTweets, setSavedTweets } from "../../store/actions/tweets.actions";
 
-// Twitter API doesn't work because of CORS policy issue that can't be resolved without backend
-// import { twitter } from "../../api";
 const App = () => {
-  const [tweets, setTweets] = useState([]);
-  const [savedTweets, setSavedTweets] = useState([]);
-  const [tweetToSave, setTweetToSave] = useState({});
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("tweets"));
-    setSavedTweets(saved ? saved : []);
-  }, []);
+  const tweetToSave = useSelector((state) => state.tweetToSave);
 
-  const onFinalSubmit = async (query) => {
+  const onSubmit = async (query) => {
     const response = await api.get("/search/photos", {
       params: {
         query,
         per_page: 10,
       },
     });
-    setTweets(response.data.results);
+    dispatch(setTweets(response.data.results));
   };
-
-  const onSubmit = (query) => {
-    // query handler that does the API request passed through props in that way:
-    // App -> LeftColumn -> SearchBar
-    // Can be refactored with Redux or React context
-    onFinalSubmit(query);
-  };
-
-  // Twitter SPI doesn't work because of CORS policy issue that can't be resolver without backend
-  // const onFinalSubmit = (query) => {
-  //   twitter.get("search/tweets", { q: `${query}`, count: 10 }, function (
-  //     err,
-  //     data,
-  //     response
-  //   ) {
-  //     console.log(data);
-  //   });
-  // };
 
   const onDrop = (e) => {
     e.preventDefault();
@@ -56,7 +33,7 @@ const App = () => {
     } else {
       localStorage.setItem("tweets", JSON.stringify([tweetToSave]));
     }
-    setSavedTweets(JSON.parse(localStorage.getItem("tweets")));
+    dispatch(setSavedTweets(JSON.parse(localStorage.getItem("tweets"))));
 
     var data = e.dataTransfer.getData("tweet");
     document.getElementById(data).style.display = "none";
@@ -66,22 +43,9 @@ const App = () => {
     e.preventDefault();
   };
 
-  const onDragStart = (e, tweet) => {
-    setTweetToSave(tweet);
-    e.dataTransfer.setData("tweet", e.target.id);
-  };
-
   const clearLocalStorage = () => {
     localStorage.clear();
-    setSavedTweets([]);
-  };
-
-  const removeSavedTweet = (id) => {
-    const saved = JSON.parse(localStorage.getItem("tweets"));
-    const updated = saved.filter((tweet) => tweet.id !== id);
-    if (updated.length) localStorage.setItem("tweets", JSON.stringify(updated));
-    else localStorage.setItem("tweets", "[]");
-    setSavedTweets(JSON.parse(localStorage.getItem("tweets")));
+    dispatch(setSavedTweets([]));
   };
 
   return (
@@ -97,18 +61,10 @@ const App = () => {
       </div>
       <div className="columnWrapper">
         <div className="column">
-          <LeftColumn
-            onFinalSubmit={onFinalSubmit}
-            tweets={tweets}
-            onDragStart={onDragStart}
-          />
+          <LeftColumn />
         </div>
         <div className="column" onDragOver={onDragOver} onDrop={onDrop}>
-          <RightColumn
-            tweets={savedTweets}
-            onDragStart={onDragStart}
-            removeSavedTweet={removeSavedTweet}
-          />
+          <RightColumn />
         </div>
       </div>
     </div>

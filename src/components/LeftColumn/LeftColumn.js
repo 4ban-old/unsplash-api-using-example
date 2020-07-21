@@ -1,7 +1,17 @@
 import React from "react";
+import { useSelector, useDispatch } from "react-redux";
 import TweetItem from "../TweetItem.js";
 import Loading from "../Loading";
-const LeftColumn = ({ tweets, onDragStart }) => {
+
+import { setTweetToSave } from "../../store/actions/tweets.actions";
+const LeftColumn = () => {
+  const dispatch = useDispatch();
+  const tweets = useSelector((state) => state.tweets);
+
+  const onDragStart = (e, tweet) => {
+    dispatch(setTweetToSave(tweet));
+    e.dataTransfer.setData("tweet", e.target.id);
+  };
   const renderList = () => {
     if (tweets.length === 0) return <Loading text="Nothing to show" />;
     else
